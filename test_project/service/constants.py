@@ -1,0 +1,10 @@
+TIMEOUT=15
+SBIS_LINK='https://sbis.ru/'
+TENZOR_LINK='https://tensor.ru/'
+TENZOR_ABOUT_LINK='https://tensor.ru/about'
+USER_REGION='Новосибирская обл.'
+KAMCHATKA_REGION='Камчатский край'
+KAMCHATKA_PARTIAL_URL='41-kamchatskij-kraj'
+USER_REGION_PARTIAL_URL='54-novosibirskaya-oblast'
+EXPECTING_TITLE='СБИС Контакты — Камчатский край'
+EXPECTING_URL='https://sbis.ru/contacts/41-kamchatskij-kraj?tab=clients'
