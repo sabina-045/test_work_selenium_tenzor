@@ -1,3 +1,8 @@
+import os
+import re
+import time
+from urllib.parse import urlparse
+
 import allure
 from selenium.webdriver.support import expected_conditions as ec
 
@@ -6,6 +11,7 @@ from test_project.service.constants import (USER_REGION, KAMCHATKA_REGION,
                                             EXPECTING_TITLE, EXPECTING_URL)
 from test_project.pages.base_page import BasePage
 from test_project.service.locators import SbisPageLocators
+from test_project.tests.conftest import upload_file_path
 
 
 class SbisPage(BasePage):
@@ -69,3 +75,51 @@ class SbisPage(BasePage):
         title = self.browser.title
         assert EXPECTING_URL == url, 'В URL не появилась информация о выбранном регионе (Камчатский край)'
         assert EXPECTING_TITLE == title, 'В title не появилась информация о выбранном регионе (Камчатский край)'
+
+    @allure.step('Go to local version page.')
+    def go_to_download_local_version_page(self):
+        with allure.step('Find local_version_page_link.'):
+            local_version_page_link = self.browser.find_element(
+                *SbisPageLocators.LOCATOR_SBIS_FOOTER_LINK)
+        self.browser.execute_script("arguments[0].click();", local_version_page_link)
+
+    @allure.step('Choose button plugin.')
+    def push_button_plugin(self):
+        """Выбираем вкладку "Плагины"."""
+        plugin_button = self.wait.until(
+            ec.element_to_be_clickable(SbisPageLocators.LOCATOR_SBIS_PLAGIN_BUTTON))
+        plugin_button.click()
+
+    @allure.step('Downloading plugin file.')
+    def download_plugin(self):
+        """Загружаем файл с плагином в папку plagin."""
+        with allure.step('Find plugin_file.'):
+            plugin_file = self.find_element(
+                *SbisPageLocators.LOCATOR_SBIS_PLAGIN_DOWNLOAD_LINK)
+        plugin_file.send_keys(upload_file_path)
+        plugin_file.click()
+        if self.check_plugin_is_downloaded is not True:
+            time.sleep(10)
+
+        return plugin_file
+
+    @allure.step('Check: plugin is downloaded.')
+    def check_plugin_is_downloaded(self, plugin_file):
+        """Проверяем, что плагин загружен."""
+        with allure.step('Get attribute name of plugin_file: href.'):
+            attribute_name = plugin_file.get_attribute('href')
+        parsed_url = urlparse(attribute_name)
+        path = parsed_url.path
+        site_filename = os.path.basename(path)
+        assert site_filename in os.listdir(upload_file_path), 'Ожидаемый файл не скачался.'
+
+    @allure.step('Check: downloaded file size equal site file size.')
+    def check_downloaded_file_size_equal_site_file_size(self, plugin_file):
+        """Сравниваем, что файл имеет тот же размер
+        в мегабайтах, что и на сайте."""
+        text_with_size_info = plugin_file.text
+        extracted_distinct_in_text = re.search('\d*\.\d{,2}', text_with_size_info)
+        site_file_size_megabytes = float(extracted_distinct_in_text.group(0))
+        downloaded_file_size_bytes = os.path.getsize(f'{upload_file_path}/sbisplugin-setup-web.exe')
+        downloaded_file_size_megabytes = round(downloaded_file_size_bytes / 1048576, 2)
+        assert site_file_size_megabytes == downloaded_file_size_megabytes

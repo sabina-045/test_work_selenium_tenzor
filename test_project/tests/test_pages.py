@@ -27,3 +27,13 @@ def test_scenario_two(browser):
     sbis_page.check_new_region_appears()
     sbis_page.check_new_region_has_new_partners_list(user_region_partners_list)
     sbis_page.check_new_region_info_in_url_and_title()
+
+
+@allure.feature('Scenario_three')
+def test_scenario_three(browser):
+    sbis_page = SbisPage(browser, SBIS_LINK)
+    sbis_page.go_to_download_local_version_page()
+    sbis_page.push_button_plugin()
+    plugin_file = sbis_page.download_plugin()
+    sbis_page.check_plugin_is_downloaded(plugin_file)
+    sbis_page.check_downloaded_file_size_equal_site_file_size(plugin_file)

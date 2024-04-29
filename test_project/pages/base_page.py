@@ -6,7 +6,7 @@ class BasePage:
     def __init__(self, browser, url):
         self.browser = browser
         self.url = url
-        self.wait = WebDriverWait(self.browser, TIMEOUT)
+        self.wait = WebDriverWait(self.browser, TIMEOUT, poll_frequency=1)
 
     def find_element(self, locator_type, locator):
 
@@ -15,4 +15,3 @@ class BasePage:
     def find_elements(self, locator_type, locator):
 
         return self.browser.find_elements(locator_type, locator)
-
